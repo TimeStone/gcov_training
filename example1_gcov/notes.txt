@@ -1,0 +1,89 @@
+#!/bin/sh
+
+which gcov
+which lcov
+
+rm -rf *.o *.gcda *.gcno *.gcov program coverage*
+echo "######################################################"
+echo "Files before compile"
+echo "######################################################"
+ls -lah
+
+echo "######################################################"
+echo "Compile with GCOV compiler options:" 
+echo "Run: 'g++ -fprofile-arcs -ftest-coverage -fPIC -O0 example1.cpp -o program'"
+echo "######################################################"
+g++ -fprofile-arcs -ftest-coverage -fPIC -O0 example1.cpp -o program
+echo "######################################################"
+echo "Files after compile, and check coverage without any test by 'gcov example1.cpp'"
+echo "######################################################"
+ls -lah
+gcov example1.cpp
+
+#Run Test
+echo "######################################################"
+echo "Running test1 './program' and check coverage"
+echo "######################################################"
+./program
+if (( $?==0 ));
+then
+        echo "Test OK!"
+else
+        echo "Test Failed!"
+fi
+gcov example1.cpp
+echo "######################################################"
+echo "Running test2 './program mypara1 mypara2' and check coverage"
+echo "######################################################"
+./program mypara1 mypara2
+if (( $?==2 ));
+then
+	echo "Test OK!"
+else
+	echo "Test Failed!"
+fi 
+gcov example1.cpp
+set +x
+echo "######################################################"
+echo "Files after all test"
+echo "######################################################"
+set -x
+ls -lah
+cat example1.cpp.gcov
+set +x
+echo "######################################################"
+echo "Generate report with LCOV and genhtml:"
+echo "Run 'lcov -t MyTeestTitle -c -d ./ -o coverage.info'"
+echo "Run 'lcov -l coverage.info'"
+echo "Run 'genhtml -t MyReportTitle -o coverage  coverage.info'"
+echo "######################################################"
+set -x
+lcov -t MyTeestTitle -c -d ./ -o coverage.info
+lcov -l coverage.info
+genhtml -t MyReportTitle -o coverage  coverage.info
+set +x
+#IF need ignore some files before genhtml
+#<<IGNORE_3RD
+echo "######################################################"
+echo "IGNORE 3rd"
+echo "Run 'lcov -t MyTeestTitle -d ./ -r coverage.info '*4.4.7*' -o coverage.info'"
+echo "Run 'genhtml -t MyReportTitle -o coverage_no3rd  coverage.info'"
+echo "######################################################"
+lcov -t MyTeestTitle -d ./ -r coverage.info '*4.4.7*' -o coverage.info
+genhtml -t MyReportTitle -o coverage_no3rd  coverage.info
+#IGNORE_3RD
+
+
+ls -lah
+#firefox coverage/index.html&
+#firefox coverage_no3rd/index.html&
+
+
+echo "######################################################"
+echo "Check Performance"
+echo "######################################################"
+rm -rf program
+g++ -pg -fprofile-arcs -ftest-coverage -fPIC -O0 example1.cpp -o program
+./program 11 22
+gcov example1.cpp
+
