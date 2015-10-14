@@ -26,5 +26,3 @@ then
 else
         echo "Test Failed!"
 fi
-gcov example1.cpp
-

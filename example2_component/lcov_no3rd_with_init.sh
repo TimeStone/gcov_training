@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./test.txt > build.log
+./build_test.sh > build.log
 
 echo "######################################################"
 echo "Generate report with LCOV and genhtml:"
